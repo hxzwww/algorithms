@@ -1,1 +1,1 @@
-# sem_cpp
+# semestr_1_cpp
