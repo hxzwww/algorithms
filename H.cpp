@@ -2,7 +2,6 @@
 #include <cstdio>
 
 unsigned long long bytePart(int part, unsigned long long num) {
-
     return (num >> (8 * (part - 1))) % 256;
 }
 
