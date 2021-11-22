@@ -15,20 +15,24 @@ int partition(int* arr, int left, int right, int pIndex) {
 }
 
 int quickSelect(int* arr, int left, int right, int k) {
-    if (left == right) {
-        return arr[left];
-    }
-    int pIndex = left + rand() % (right - left + 1);
-    pIndex = partition(arr, left, right, pIndex);
-    if (k == pIndex) {
-        return arr[k];
-    }
-    else if (k < pIndex) {
-        return quickSelect(arr, left, pIndex - 1, k);
-    }
-    else {
-        return quickSelect(arr, pIndex + 1, right, k);
-    }
+    while (left != right) {
+
+        int pIndex = left + rand() % (right - left + 1);
+        pIndex = partition(arr, left, right, pIndex);
+        if (k == pIndex) {
+            return arr[k];
+        }
+        else if (k < pIndex) {
+            right =  pIndex - 1;
+        }
+        else {
+            left =  pIndex + 1;
+        }
+        if (left == right) {
+            break;
+        }
+    }   
+    return arr[left];
 }
 
 int main() {
