@@ -7,21 +7,21 @@ class Heap {
         int* pointer;
         int* num;
         long long* heap;
-        int curHeapSize;
-        int curPointerSize;
         int heapSize;
         int pointerSize;
+        int heap_bufferSize;
+        int pointer_bufferSize;
 
     public:
 
         Heap() {
-            heapSize = 32;
-            pointerSize = 32;
-            curHeapSize = 0;
-            curPointerSize = 0;
-            pointer = new int [pointerSize];
-            num = new int [heapSize];
-            heap = new long long [heapSize];
+            heap_bufferSize = 32;
+            pointer_bufferSize = 32;
+            heapSize = 0;
+            pointerSize = 0;
+            pointer = new int [pointer_bufferSize];
+            num = new int [heap_bufferSize];
+            heap = new long long [heap_bufferSize];
         }
 
         Heap(const Heap& other) {
@@ -32,16 +32,16 @@ class Heap {
             if (this == &other) {
                 return *this;
             }
+            heap_bufferSize = other.heap_bufferSize;
+            pointer_bufferSize = other.pointer_bufferSize;
             heapSize = other.heapSize;
             pointerSize = other.pointerSize;
-            curHeapSize = other.curHeapSize;
-            curPointerSize = other.curPointerSize;
-            pointer = new int [pointerSize];
-            num = new int [heapSize];
-            heap = new long long [heapSize];
-            memcpy(pointer, other.pointer, curPointerSize);
-            memcpy(heap, other.heap, curHeapSize);
-            memcpy(num, other.num, curHeapSize);
+            pointer = new int [pointer_bufferSize];
+            num = new int [heap_bufferSize];
+            heap = new long long [heap_bufferSize];
+            memcpy(pointer, other.pointer, pointerSize);
+            memcpy(heap, other.heap, heapSize);
+            memcpy(num, other.num, heapSize);
         }
 
         ~Heap () {
@@ -68,10 +68,10 @@ class Heap {
         }
 
         void siftDown(int v) {
-            while (2 * v <= curHeapSize) {
+            while (2 * v <= heapSize) {
                 int u = 2 * v;
  
-                if (2 * v + 1 <= curHeapSize && heap[2 * v + 1] < heap[2 * v]) {
+                if (2 * v + 1 <= heapSize && heap[2 * v + 1] < heap[2 * v]) {
                     u = 2 * v + 1;
                 }
                 if (heap[u] < heap[v]) {
@@ -84,20 +84,20 @@ class Heap {
         }
 
         void checkSize() {
-            if (curHeapSize >= heapSize - 1) {
+            if (heapSize >= heap_bufferSize - 1) {
                 updateHeapSize();
             }
-            if (curPointerSize >= pointerSize -1) {
+            if (pointerSize >= pointer_bufferSize -1) {
                 updatePointerSize();
             }
         }
 
         void updateHeapSize() {
-            heapSize = std::min(heapSize * 2, 1000000);
-            long long* heapCopy = new long long [heapSize];
-            int* numCopy = new int [heapSize];
-            memcpy(heapCopy, heap, (curHeapSize + 1) * sizeof(long long));
-            memcpy(numCopy, num, (curHeapSize + 1) * sizeof(int));
+            heap_bufferSize = std::min(heap_bufferSize * 2, 1000000);
+            long long* heapCopy = new long long [heap_bufferSize];
+            int* numCopy = new int [heap_bufferSize];
+            memcpy(heapCopy, heap, (heapSize + 1) * sizeof(long long));
+            memcpy(numCopy, num, (heapSize + 1) * sizeof(int));
             delete [] heap;
             delete [] num;
             heap = heapCopy;
@@ -105,40 +105,40 @@ class Heap {
         }
 
         void updatePointerSize() {
-            pointerSize = std::min(pointerSize * 2, 1000000);
-            int* pointerCopy = new int [pointerSize];
-            memcpy(pointerCopy, pointer, (curPointerSize + 1) * sizeof(int));
+            pointer_bufferSize = std::min(pointer_bufferSize * 2, 1000000);
+            int* pointerCopy = new int [pointer_bufferSize];
+            memcpy(pointerCopy, pointer, (pointerSize + 1) * sizeof(int));
             delete [] pointer;
             pointer = pointerCopy;
         }
 
         void insert(long long x) {
             checkSize();
-            ++curHeapSize;
-            ++curPointerSize;
-            num[curHeapSize] = curPointerSize;
-            heap[curHeapSize] = x;
-            pointer[curPointerSize] = curHeapSize;
-            siftUp(curHeapSize);
+            ++heapSize;
+            ++pointerSize;
+            num[heapSize] = pointerSize;
+            heap[heapSize] = x;
+            pointer[pointerSize] = heapSize;
+            siftUp(heapSize);
         }
 
         long long getMin() {
             checkSize();
-            ++curPointerSize;
+            ++pointerSize;
             return heap[1];
         }
 
         void extractMin() {
             checkSize();
-            ++curPointerSize;
-            exchange(1, curHeapSize);
-            --curHeapSize;
+            ++pointerSize;
+            exchange(1, heapSize);
+            --heapSize;
             siftDown(1);
         }
 
         void decreaseKey(int v, int delta) {
             checkSize();
-            ++curPointerSize;
+            ++pointerSize;
             heap[pointer[v]] -= delta;
             siftUp(pointer[v]);
             siftDown(pointer[v]);
