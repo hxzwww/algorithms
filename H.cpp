@@ -1,17 +1,17 @@
 #include <iostream>
 #include <cstdio>
 
-enum consts {
-    len = 256
-};
+const int len = 256;
 
 unsigned long long bytePart(int part, unsigned long long num) {
     
     return (num >> (8 * (part - 1))) % len;
 }
  
-void lsdSort(unsigned long long* array, int size, unsigned long long* answer) {
- 
+unsigned long long* lsdSort(unsigned long long* array, int size) {
+
+    unsigned long long* answer = new unsigned long long [size + 1];
+
     for (int i = 1; i <= 8; i++) {
  
         int* cnt = new int [len];
@@ -36,6 +36,8 @@ void lsdSort(unsigned long long* array, int size, unsigned long long* answer) {
  
         delete [] cnt;
     }
+
+    return answer;
 }
  
  
@@ -50,14 +52,11 @@ int main() {
         scanf("%llu", &array[i]);
     }
  
-    unsigned long long* answer = new unsigned long long [size + 1];
- 
-    lsdSort(array, size, answer);
+    array = lsdSort(array, size);
  
     for (int i = 1; i <= size; i++) {
-        printf("%llu ", answer[i]);
+        printf("%llu ", array[i]);
     }
  
     delete [] array;
-    delete [] answer;
 }
