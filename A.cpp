@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cassert>
 
 struct node {
     int val = 0;
@@ -12,15 +13,17 @@ private:
     int size_;
 
     void delete_(node* cur) {
-        if (cur->prev) delete_(cur->prev);
-        delete cur;
+        if (cur) {
+            if (cur->prev) delete_(cur->prev);
+            delete cur;
+        }
     }
 
 public:
     stack() : last(nullptr), size_(0) {}
 
     ~stack() {
-        if (last) delete_(last);
+        delete_(last);
     }
 
     void push(int x) {
@@ -51,7 +54,7 @@ public:
     }
 
     void clear() {
-        if (last) delete_(last);
+        delete_(last);
         last = nullptr;
         size_ = 0;
     }
