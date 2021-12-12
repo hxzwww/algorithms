@@ -1,8 +1,8 @@
 #include <iostream>
 
 struct node {
-    int val;
-    node* ptr;
+    int val = 0;
+    node* ptr = nullptr;
 };
 
 class GoblinsQueue {
@@ -19,7 +19,6 @@ public:
     void push(int v) {
         queue_size++;
         node* m = new node;
-        m -> ptr = nullptr;
         m -> val = v;
         if (queue_size == 1) {
             last = m;
@@ -50,7 +49,6 @@ public:
         node* m = new node;
         m -> val = v;
         if (queue_size == 1) {
-            m -> ptr = nullptr;
             first = m;
             mid = m;
             last = m;
@@ -65,12 +63,14 @@ public:
     }
 
     ~GoblinsQueue() {
-        if (first) delete_(first);
+        delete_(first);
     }
 
     void delete_(node* cur) {
-        if (cur->ptr) delete_(cur->ptr);
-        delete cur;
+        if (cur) {
+            delete_(cur->ptr);
+            delete cur;
+        }
     }
 };
 
