@@ -14,7 +14,7 @@ private:
 
     void delete_(node* cur) {
         if (cur) {
-            if (cur->prev) delete_(cur->prev);
+            delete_(cur->prev);
             delete cur;
         }
     }
