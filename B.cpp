@@ -43,7 +43,7 @@ int main() {
     for (int i = 0; i < n; ++i) {
         std::cin >> array[i];
     }
-    vector<int> dp_by_val(n, 1e9);
+    vector<int> dp_by_val(n, -1e9);
     vector<int> prev_elem(n);
     vector<int> dp_by_ind(n);
     count(array, dp_by_val, dp_by_ind, prev_elem, n);
