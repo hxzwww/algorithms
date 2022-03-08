@@ -1,1 +1,1 @@
-# sem_cpp
+# for_algorithms_review
