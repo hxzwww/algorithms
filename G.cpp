@@ -28,6 +28,45 @@ bool is_two_in_row(int mask, int n) {
     return false;
 }
 
+int64_t solve(int n, int m, std::vector<vec_char>& pattern) {
+    int T = (1 << n);                                                           
+    int current_mask;                                                           
+    int64_t result = 0, current_res, count;                                     
+    for (int mask = 0; mask < T; ++mask) {                                      
+        if (!check(mask, n, pattern[0])) {                                      
+            continue;                                                           
+        }                                                                       
+        current_res = 1;                                                        
+        current_mask = (T - 1) ^ mask;                                          
+        if (is_two_in_row(mask, n)) {                                           
+            for (int i = 1; i < m; ++i) {                                       
+                current_res = check(current_mask, n, pattern[i]);               
+                current_mask = (T - 1) ^ current_mask;                          
+                if (!current_res) {                                             
+                    break;                                                      
+                }                                                               
+            }                                                                   
+        } else {                                                                
+            for (int i = 1; i < m; ++i) {                                       
+                count = 0;                                                      
+                if (check(current_mask, n, pattern[i])) {                       
+                    ++count;                                                    
+                }                                                               
+                if (check((T - 1) ^ current_mask, n, pattern[i])) {             
+                    ++count;                                                    
+                }                                                               
+                current_res *= count;                                           
+                if (!current_res) {                                             
+                    break;                                                      
+                }                                                               
+            }                                                                   
+        }                                                                       
+        result += current_res;                                                  
+        result %= module;                                                       
+    }
+    return result;
+}
+
 int main() {
     int n, m;
     std::cin >> n >> m;
@@ -39,40 +78,5 @@ int main() {
             pattern[j][i] = read[j];
         }
     }
-    int T = (1 << n);
-    int current_mask;
-    int64_t result = 0, current_res, count;
-    for (int mask = 0; mask < T; ++mask) {
-        if (!check(mask, n, pattern[0])) {
-            continue;
-        }
-        current_res = 1;
-        current_mask = (T - 1) ^ mask;
-        if (is_two_in_row(mask, n)) {
-            for (int i = 1; i < m; ++i) {
-                current_res = check(current_mask, n, pattern[i]);
-                current_mask = (T - 1) ^ current_mask;
-                if (!current_res) {
-                    break;
-                }
-            }
-        } else {
-            for (int i = 1; i < m; ++i) {
-                count = 0;
-                if (check(current_mask, n, pattern[i])) {
-                    ++count;
-                }
-                if (check((T - 1) ^ current_mask, n, pattern[i])) {
-                    ++count;
-                }
-                current_res *= count;
-                if (!current_res) {
-                    break;
-                }
-            }
-        }
-        result += current_res;
-        result %= module;
-    }
-    std::cout << result;
+    std::cout << solve(n, m, pattern);
 }
