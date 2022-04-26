@@ -1,7 +1,22 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 
 using std::vector;
+
+
+// dp_by_val - динамика, в которой расположены элементы начальной
+// последовательности в порядке убывания
+// dp_by_ind - то же самое, только хранится индекс этого элемента в начальной
+// последовательности
+// prev_elem - очевидно, для i-го элемента хранится соседний слева (в момент
+// добавления) элемент в dp_by_val
+
+// пересчет - вставка в обе dp при помощи бинпоиска
+
+// ответ: последний элемент в dp - первый элемент в искомой НВП; при помощи 
+// prev_elem восстанавливаем ответ
+
 
 void bin_insert(vector<int>& dp_by_val, vector<int>& dp_by_ind, int val, 
         vector<int>& prev_elem, int i, int n) {
@@ -36,6 +51,27 @@ void count(vector<int>& array, vector<int>& dp_by_val, vector<int>& dp_by_ind,
     }
 }
 
+std::pair<int, vector<int>> solve(int n, vector<int>& array) {
+    vector<int> dp_by_val(n, -1e9);                                              
+    vector<int> prev_elem(n);                                                    
+    vector<int> dp_by_ind(n);                                                    
+    count(array, dp_by_val, dp_by_ind, prev_elem, n);                            
+    int len;                                                                     
+    for (int i = 0; i < n; ++i) {                                                
+        if (dp_by_val[i + 1] == -1e9 || i == n - 1) {                            
+            len = i + 1;                                                         
+            break;                                                               
+        }                                                                        
+    }                                                                            
+    vector<int> sequence(len);                                                   
+    sequence[len - 1] = dp_by_ind[len - 1];                                      
+    for (int i = len - 1; i > 0; --i) {                                          
+        sequence[i - 1] = prev_elem[sequence[i]];                                
+    }
+
+    return std::make_pair(len, sequence);
+}
+
 int main() {
     int n;
     std::cin >> n;
@@ -43,24 +79,9 @@ int main() {
     for (int i = 0; i < n; ++i) {
         std::cin >> array[i];
     }
-    vector<int> dp_by_val(n, -1e9);
-    vector<int> prev_elem(n);
-    vector<int> dp_by_ind(n);
-    count(array, dp_by_val, dp_by_ind, prev_elem, n);
-    int len;
-    for (int i = 0; i < n; ++i) {
-        if (dp_by_val[i + 1] == -1e9 || i == n - 1) {
-            len = i + 1;
-            break;
-        }
-    }
-    std::cout << len << '\n';
-    vector<int> sequence(len);
-    sequence[len - 1] = dp_by_ind[len - 1];
-    for (int i = len - 1; i > 0; --i) {
-        sequence[i - 1] = prev_elem[sequence[i]];
-    }
-    for (int i = 0; i < len; ++i) {
-        std::cout << sequence[i] + 1 << ' ';
+    std::pair<int, vector<int>> result = solve(n, array);
+    std::cout << result.first << '\n';
+    for (int i = 0; i < result.first; ++i) {
+        std::cout << result.second[i] + 1 << ' ';
     }
 }
