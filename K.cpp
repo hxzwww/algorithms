@@ -26,7 +26,8 @@ struct Condition {
     ~Condition() {}
 };
 
-using QUEUE = std::priority_queue<Condition, vector<Condition>, std::greater<Condition>>;
+using QUEUE = std::priority_queue<
+Condition, vector<Condition>, std::greater<Condition>>;
 
 static const uint64_t finish_condition = 1147797409030816545;
 
@@ -101,7 +102,16 @@ uint64_t swap(uint64_t mask, uint64_t a, uint64_t b) {
     return mask;
 }
 
-void foo(Condition& cond, QUEUE& queue, std::unordered_set<uint64_t>& used) {
+void process(Condition& new_cond, Condition& cond, char sym, int shift,         
+        int zero_num, QUEUE& queue) {
+    new_cond.current = swap(cond.current, zero_num, zero_num + shift);          
+    new_cond.res = cond.res + sym;                                          
+    new_cond.weight = new_cond.res.size() + manhattan(new_cond) +
+        linear_conflicts(new_cond);
+    queue.push(new_cond);
+}
+
+void next_conds(Condition& cond, QUEUE& queue, std::unordered_set<uint64_t>& used) {
     used.insert(cond.current);
     uint8_t zero_num;
     for (int i = 0; i < 16; ++i) {
@@ -112,37 +122,20 @@ void foo(Condition& cond, QUEUE& queue, std::unordered_set<uint64_t>& used) {
     }
     Condition new_cond;
     if (zero_num >= 4 && cond.res.back() != 'U') {
-       
-        new_cond.current = swap(cond.current, zero_num, zero_num - 4);          
-        new_cond.res = cond.res + 'D';
-        new_cond.weight = new_cond.res.size() + manhattan(new_cond) + linear_conflicts(new_cond);
-        queue.push(new_cond);
+        process(new_cond, cond, 'D', -4, zero_num, queue); 
     }
     if (zero_num % 4 != 0 && cond.res.back() != 'L') {
-        
-        new_cond.current = swap(cond.current, zero_num, zero_num - 1);
-        new_cond.res = cond.res + 'R';
-        new_cond.weight = new_cond.res.size() + manhattan(new_cond) + linear_conflicts(new_cond); 
-        queue.push(new_cond);
+        process(new_cond, cond, 'R', -1, zero_num, queue);  
     }
     if (zero_num % 4 != 3 && cond.res.back() != 'R') {
-        
-        new_cond.current = swap(cond.current, zero_num, zero_num + 1);
-        new_cond.res = cond.res + 'L';
-        new_cond.weight = new_cond.res.size() + manhattan(new_cond) + linear_conflicts(new_cond);
-        queue.push(new_cond);            
+        process(new_cond, cond, 'L', 1, zero_num, queue);   
     }
     if (zero_num < 12 && cond.res.back() != 'D') {
-        
-        new_cond.current = swap(cond.current, zero_num, zero_num + 4);
-        new_cond.res = cond.res + 'U';
-        new_cond.weight = new_cond.res.size() + manhattan(new_cond) + linear_conflicts(new_cond); 
-        queue.push(new_cond);
+        process(new_cond, cond, 'U', 4, zero_num, queue);   
     }
 }
 
 std::string solve(vector<int>& start) {
-            
     Condition first;
     first.current = tolong(start);
     int weight = manhattan(first) + linear_conflicts(first);
@@ -162,7 +155,7 @@ std::string solve(vector<int>& start) {
         if (v.current == finish_condition) {
             return std::to_string(v.res.size()) + '\n' + v.res;
         }
-        foo(v, queue, used);
+        next_conds(v, queue, used);
     }
     return "";
 }
