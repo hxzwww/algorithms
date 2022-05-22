@@ -6,10 +6,11 @@
 using std::vector;
 
 struct edge {                                                                   
-    int to, weight;                                                            
+    int to = 0;
+    int weight = 0;                                                            
 }; 
 
-int deikstr(int s, int t, int n, vector<vector<edge>>& neighb) {
+int deikstr(int s, int t, int n, const vector<vector<edge>>& neighb) {
     std::set<std::pair<int, int>> heap;
     vector<int> dist(n + 1, 2e9);
     dist[s] = 0;
