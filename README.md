@@ -1,1 +1,1 @@
-# for_algorithms_review
+some tasks from mipt algorithms course
