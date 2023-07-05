@@ -1,6 +1,5 @@
-// 15-puzzle solver (using A* algo)
-
 #include <string>
+#pragma GCC optimize("Ofast")
 #include <iostream>
 #include <vector>
 #include <unordered_set>
@@ -10,12 +9,12 @@ using std::vector;
 
 struct Condition {
     int weight;
-    uint64_t current;
-    std::string res;
+    uint64_t current; 
+    std::string res; 
     Condition() = default;
     Condition(const Condition& other) :
-        weight(other.weight),
-        current(other.current),
+        weight(other.weight), 
+        current(other.current), 
         res(other.res) {}
     Condition(uint64_t current, std::string res, int weight) :
         weight(weight), current(current), res(res) {}
@@ -37,58 +36,17 @@ bool operator>(const Condition& a, const Condition& b) {
     return a.res.size() < b.res.size();
 }
 
-uint64_t tolong(vector<int>& vec) {
-    uint64_t res = 0;
-    for (int i = 15; i >= 0; --i) {
-        res <<= 4;
-        res += vec[i];
-    }
-    return res;
+uint64_t tolong(vector<int>& vec) {                                         
+    uint64_t res = 0;                                                           
+    for (int i = 15; i >= 0; --i) {                                             
+        res <<= 4;                                                              
+        res += vec[i];                                                            
+    }                                                                           
+    return res;                                                                 
 }
 
-int num(uint64_t mask, int i) {
-    return (mask >> (4 * i)) & 15;
-}
-
-int manhattan(Condition& cond) {
-    int value = 0;
-    for (int i = 0; i < 16; ++i) {
-        int number = num(cond.current, i);
-        if (!number)  continue;
-        value += abs(i / 4 - (number - 1) / 4) + abs(i % 4 - (number - 1) % 4);
-    }
-    return value;
-}
-
-
-int linear_conflicts(Condition& cond) {
-    int count = 0;
-    for (int i = 0; i < 16; ++i) {
-        int first = num(cond.current, i) - 1;
-        for (int j = 0; j < i; ++j) {
-            int second = num(cond.current, j) - 1;
-
-            if (first == -1 || second == -1) continue;
-
-            if (second > first) {
-                if (i % 4 > j % 4) {
-                    if (first / 4 == second / 4 &&
-                            second / 4 == j / 4 &&
-                            first / 4 == i / 4) {
-                        count += 2;
-                    }
-                }
-                if (i / 4 > j / 4) {
-                    if (first % 4 == second % 4 &&
-                            second % 4 == j % 4 &&
-                            first % 4 == i % 4) {
-                        count += 2;
-                    }
-                }
-            }
-        }
-    }
-    return count;
+int num(uint64_t mask, int i) {                                                 
+    return (mask >> (4 * i)) & 15;                                          
 }
 
 uint64_t swap(uint64_t mask, uint64_t a, uint64_t b) {
@@ -103,12 +61,12 @@ uint64_t swap(uint64_t mask, uint64_t a, uint64_t b) {
     return mask;
 }
 
-void process(Condition& new_cond, Condition& cond, char sym, int shift,
+void process(Condition& new_cond, Condition& cond, char sym, int shift, 
         int zero_num, QUEUE& queue) {
-    new_cond.current = swap(cond.current, zero_num, zero_num + shift);
     new_cond.res = cond.res + sym;
-    new_cond.weight = new_cond.res.size() + manhattan(new_cond) +
-        linear_conflicts(new_cond);
+    new_cond.weight = cond.weight -
+        (num(new_cond.current, zero_num) == zero_num + 1) +
+        (num(cond.current, zero_num + shift) == zero_num + shift + 1);
     queue.push(new_cond);
 }
 
@@ -123,25 +81,43 @@ void next_conds(Condition& cond, QUEUE& queue, std::unordered_set<uint64_t>& use
     }
     Condition new_cond;
     if (zero_num >= 4 && cond.res.back() != 'U') {
-        process(new_cond, cond, 'D', -4, zero_num, queue);
+        new_cond.current = swap(cond.current, zero_num, zero_num - 4);
+        if (used.find(new_cond.current) == used.end())         
+            process(new_cond, cond, 'D', -4, zero_num, queue);
     }
     if (zero_num % 4 != 0 && cond.res.back() != 'L') {
-        process(new_cond, cond, 'R', -1, zero_num, queue);
+        new_cond.current = swap(cond.current, zero_num, zero_num - 1);
+        if (used.find(new_cond.current) == used.end()) 
+            process(new_cond, cond, 'R', -1, zero_num, queue);
     }
     if (zero_num % 4 != 3 && cond.res.back() != 'R') {
-        process(new_cond, cond, 'L', 1, zero_num, queue);
+        new_cond.current = swap(cond.current, zero_num, zero_num + 1);
+        if (used.find(new_cond.current) == used.end()) 
+            process(new_cond, cond, 'L', 1, zero_num, queue); 
     }
     if (zero_num < 12 && cond.res.back() != 'D') {
-        process(new_cond, cond, 'U', 4, zero_num, queue);
+        new_cond.current = swap(cond.current, zero_num, zero_num + 4);
+        if (used.find(new_cond.current) == used.end()) 
+            process(new_cond, cond, 'U', 4, zero_num, queue);
     }
 }
 
+int conflict_counter(vector<int>& cur) {
+    int count = 0;
+    for (int i = 0; i < 16; ++i) {
+        if (!cur[i]) continue;
+        count += (cur[i] != i + 1);
+    }
+    return count;
+}
+
 std::string solve(vector<int>& start) {
+            
     Condition first;
     first.current = tolong(start);
-    int weight = manhattan(first) + linear_conflicts(first);
+    int weight = conflict_counter(start);
     first.res = "";
-
+        
     QUEUE queue;
     queue.push(first);
 
@@ -183,11 +159,12 @@ int main() {
         std::cin >> start[i];
         if (start[i] == 0) zero_num = i;
     }
-
+    
     if (!solvable(start, zero_num)) {
         std::cout << -1;
     } else {
         std::cout << solve(start);
-    }
+    } 
 }
- 
+
+

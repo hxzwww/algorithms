@@ -1,8 +1,8 @@
 #include <iostream>
 #include <vector>
- 
+
 using std::vector;
- 
+
 int main() {
     int n;
     std::cin >> n;
@@ -73,7 +73,7 @@ int main() {
             dpM[mask] = std::max(dpM[t], dpM[mask]);
         }
     }
- 
+
     uint64_t count = 0;
     for (uint64_t i = 1; i < (1 << M); ++i) {
         count += dpM[i];
@@ -103,3 +103,21 @@ int main() {
     }
     std::cout << count + 1 << '\n';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

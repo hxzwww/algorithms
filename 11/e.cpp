@@ -1,5 +1,3 @@
-// fast fourier transform algo
-
 #include <cmath>
 #include <complex>
 #include <iostream>
@@ -99,3 +97,4 @@ int main() {
     std::cout << result[i] << ' ';
   }
 }
+
